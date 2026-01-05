@@ -8,14 +8,14 @@
 
 class Quotes_Collection_DB {
 
-	const PLUGIN_DB_VERSION = '1.4';
+	const PLUGIN_DB_VERSION = '1.5';
 
 	private $db, $table_name;
 
 	public function __construct() {
 		global $wpdb;
 		$this->db = $wpdb;
-		$this->table_name = "`". $this->db->prefix . "quotescollection`";
+		$this->table_name = $this->db->prefix . 'quotescollection';
 	}
 
 
@@ -85,10 +85,8 @@ class Quotes_Collection_DB {
 	 * @return bool true if found, false if not
 	 */
 	private function is_table_found() {
-	    if($this->db->get_var("SHOW TABLES LIKE '".$this->table_name."'") != $this->table_name)
-			return true;
-		else return false;
-
+		$table = $this->db->get_var( $this->db->prepare( "SHOW TABLES LIKE %s", $this->table_name ) );
+		return ( $table == $this->table_name );
 	}
 
 	/**
@@ -221,11 +219,10 @@ class Quotes_Collection_DB {
 	 */
 	public function delete_quote($quote_id) {
 		if(is_numeric($quote_id)) {
-				$sql = "DELETE from " . $this->table_name .
-				" WHERE quote_id = " . $quote_id;
-			return $this->db->query($sql);
+			$sql = $this->db->prepare( "DELETE FROM {$this->table_name} WHERE quote_id = %d", $quote_id );
+			return $this->db->query( $sql );
 		}
-		else return 0;
+		return 0;
 	}
 
 
@@ -243,9 +240,12 @@ class Quotes_Collection_DB {
 				return 0;
 		}
 
-		$sql = "DELETE FROM ".$this->table_name
-			."WHERE quote_id IN (".implode(', ', $quote_ids).")";
-		return $this->db->query($sql);
+		$placeholders = implode( ', ', array_fill( 0, count( $quote_ids ), '%d' ) );
+		$sql = "DELETE FROM {$this->table_name} WHERE quote_id IN ({$placeholders})";
+		$args = $quote_ids;
+		array_unshift( $args, $sql );
+		$sql = call_user_func_array( array( $this->db, 'prepare' ), $args );
+		return $this->db->query( $sql );
 	}
 
 	/**
@@ -262,11 +262,11 @@ class Quotes_Collection_DB {
 				return -1;
 			}
 		}
-		$sql = "UPDATE ".$this->table_name
-			."SET public = '".$visibility."',
-			time_updated = NOW()
-			WHERE quote_id IN (".implode(', ', $quote_ids).")";
-		return $this->db->query($sql);
+		$placeholders = implode( ', ', array_fill( 0, count( $quote_ids ), '%d' ) );
+		$sql = "UPDATE {$this->table_name} SET public = %s, time_updated = NOW() WHERE quote_id IN ({$placeholders})";
+		$args = array_merge( array( $sql, $visibility ), $quote_ids );
+		$sql = call_user_func_array( array( $this->db, 'prepare' ), $args );
+		return $this->db->query( $sql );
 	}
 
 	/**
@@ -288,14 +288,8 @@ class Quotes_Collection_DB {
 
 	public static function install_db() {
 
-		if(
-			( ! current_user_can( 'activate_plugins' ) )
-			|| (
-				$options = get_option('quotescollection')
-				&& isset( $options['db_version'] )
-				&& self::PLUGIN_DB_VERSION == $options['db_version']
-			)
-		) {
+		$options = get_option('quotescollection');
+		if ( ! current_user_can( 'activate_plugins' ) || ( isset( $options['db_version'] ) && self::PLUGIN_DB_VERSION == $options['db_version'] ) ) {
 			return;
 		}
 
@@ -303,45 +297,22 @@ class Quotes_Collection_DB {
 
 		$table_name = $wpdb->prefix.'quotescollection';
 
-		if(!defined('DB_CHARSET') || !($db_charset = DB_CHARSET))
-			$db_charset = 'utf8';
-		$db_charset = "CHARACTER SET ".$db_charset;
-		if(defined('DB_COLLATE') && $db_collate = DB_COLLATE)
-			$db_collate = "COLLATE ".$db_collate;
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		$charset_collate = $wpdb->get_charset_collate();
 
+		$sql = "CREATE TABLE " . $table_name . " (
+			quote_id MEDIUMINT NOT NULL AUTO_INCREMENT,
+			quote TEXT NOT NULL,
+			author VARCHAR(255),
+			source VARCHAR(255),
+			tags VARCHAR(255),
+			public enum('yes','no') DEFAULT 'yes' NOT NULL,
+			time_added datetime NOT NULL,
+			time_updated datetime,
+			PRIMARY KEY  (quote_id)
+		) " . $charset_collate . ";";
 
-		// if table name already exists
-		if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
-	   		$wpdb->query("ALTER TABLE `{$table_name}` {$db_charset} {$db_collate}");
-
-	   		$wpdb->query("ALTER TABLE `{$table_name}` MODIFY quote TEXT {$db_charset} {$db_collate}");
-
-	   		$wpdb->query("ALTER TABLE `{$table_name}` MODIFY author VARCHAR(255) {$db_charset} {$db_collate}");
-
-	   		$wpdb->query("ALTER TABLE `{$table_name}` MODIFY source VARCHAR(255) {$db_charset} {$db_collate}");
-
-	   		if(!($wpdb->get_results("SHOW COLUMNS FROM {$table_name} LIKE 'tags'"))) {
-	   			$wpdb->query("ALTER TABLE `{$table_name}` ADD `tags` VARCHAR(255) {$db_charset} {$db_collate} AFTER `source`");
-			}
-	   		if(!($wpdb->get_results("SHOW COLUMNS FROM {$table_name} LIKE 'public'"))) {
-	   			$wpdb->query("ALTER TABLE `{$table_name}` CHANGE `visible` `public` enum('yes', 'no') DEFAULT 'yes' NOT NULL");
-			}
-		}
-		else {
-			//Creating the table ... fresh!
-			$sql = "CREATE TABLE " . $table_name . " (
-				quote_id MEDIUMINT NOT NULL AUTO_INCREMENT,
-				quote TEXT NOT NULL,
-				author VARCHAR(255),
-				source VARCHAR(255),
-				tags VARCHAR(255),
-				public enum('yes', 'no') DEFAULT 'yes' NOT NULL,
-				time_added datetime NOT NULL,
-				time_updated datetime,
-				PRIMARY KEY  (quote_id)
-			) {$db_charset} {$db_collate};";
-			$results = $wpdb->query( $sql );
-		}
+		dbDelta( $sql );
 
 		$options['db_version'] = self::PLUGIN_DB_VERSION;
 		update_option('quotescollection', $options);
@@ -351,7 +322,8 @@ class Quotes_Collection_DB {
 
 	public static function uninstall_db() {
 		global $wpdb;
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}quotescollection" );
+		$table = $wpdb->prefix . 'quotescollection';
+		$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
 	}
 
 
@@ -404,7 +376,7 @@ class Quotes_Collection_DB {
 			$taglist = explode(',', html_entity_decode($args['tags']));
 			$tag_condition = "";
 			foreach($taglist as $tag) {
-						$tag = $this->db->esc_like( strip_tags( trim( $tag ) ) );
+				$tag = esc_sql( $this->db->esc_like( strip_tags( trim( $tag ) ) ) );
 				if($tag_condition) $tag_condition .= " OR ";
 				$tag_condition .=
 					"tags = '{$tag}' "
@@ -418,7 +390,7 @@ class Quotes_Collection_DB {
 			}
 		}
 		if( isset($args['search']) && is_string($args['search']) && !empty($args['search']) ) {
-			$search_query = $this->db->esc_like( strip_tags( trim( $args['search'] ) ) );
+			$search_query = esc_sql( $this->db->esc_like( strip_tags( trim( $args['search'] ) ) ) );
 
 			$search_condition =
 				"quote = '{$search_query}' "

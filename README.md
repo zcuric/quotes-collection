@@ -66,3 +66,11 @@ Links
 * [Plugin at the WordPress plugin directory](https//wordpress.org/plugins/quotes-collection/)
 * [Support at the WordPress support forums](https://wordpress.org/support/plugin/quotes-collection)
 * [Development at GitHub](https://github.com/sriniguna/quotes-collection/)
+
+Changelog
+---------
+
+* **Security:** Fixed SQL injection vulnerabilities in DB methods (`delete_quote`, `delete_quotes`, `change_visibility`) by introducing prepared statements and safer escaping. ✅
+* **DB:** Modernized DB installation using `dbDelta` and `get_charset_collate()`, bumped DB version to `1.5`. ✅
+* **Stability:** Fixed logic bug in `is_table_found()` and other minor bugs (missing spaces in queries). ✅
+
