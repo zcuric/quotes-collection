@@ -44,7 +44,8 @@ class Quotes_Collection_Admin {
 			if ( isset( $options['user_level_manage_quotes'] )
 				&& in_array(
 					$options['user_level_manage_quotes'],
-					array( 'publish_posts', 'edit_others_posts', 'manage_options')
+					array( 'publish_posts', 'edit_others_posts', 'manage_options'),
+					true
 				)
 			) {
 				$this->user_level_manage_quotes = $options['user_level_manage_quotes'];
@@ -365,7 +366,8 @@ class Quotes_Collection_Admin {
 		if ( isset( $options['user_level_manage_quotes'] )
 			&& in_array(
 				$options['user_level_manage_quotes'],
-				array( 'publish_posts', 'edit_others_posts', 'manage_options')
+				array( 'publish_posts', 'edit_others_posts', 'manage_options'),
+				true
 			)
 		) {
 			$role_select[$options['user_level_manage_quotes']] = ' selected="selected"';
@@ -756,7 +758,8 @@ EDITFORM;
 		}
 
 		$allowed_extensions = array( 'json', 'JSON' );
-		if( ! in_array( pathinfo( $_FILES['quotescollection-data-file']['name'], PATHINFO_EXTENSION ), $allowed_extensions ) ) {
+		$file_extension = pathinfo( $_FILES['quotescollection-data-file']['name'], PATHINFO_EXTENSION );
+		if( ! in_array( $file_extension, $allowed_extensions, true ) ) {
 			$this->notices = '<div class="error"><p>' . __( "Invalid file format", 'quotes-collection' ) . '</p></div>';
 			return;
 		}
@@ -857,7 +860,8 @@ EDITFORM;
 		if( isset($_REQUEST['user_level_manage_quotes'])
 			&& in_array(
 				$_REQUEST['user_level_manage_quotes'],
-				array( 'edit_posts', 'publish_posts', 'edit_others_posts', 'manage_options')
+				array( 'edit_posts', 'publish_posts', 'edit_others_posts', 'manage_options'),
+				true
 			)
 		) {
 			$options['user_level_manage_quotes'] = $_REQUEST['user_level_manage_quotes'];

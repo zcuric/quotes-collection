@@ -430,7 +430,7 @@ class Quotes_Collection_DB {
 		if(isset($args['orderby']) && $args['orderby']) {
 			if($args['orderby'] == "random")
 				$condition .= " ORDER BY RAND(UNIX_TIMESTAMP(NOW()))";
-			else if(in_array($args['orderby'], array('quote_id', 'quote', 'author', 'source', 'time_added'))) {
+			else if(in_array($args['orderby'], array('quote_id', 'quote', 'author', 'source', 'time_added'), true)) {
 				$condition .= " ORDER BY `".$args['orderby']."`";
 				if( isset($args['order']) && ($args['order'] == 'DESC' || $args['order'] == 'desc') )
 					$condition .= " DESC";

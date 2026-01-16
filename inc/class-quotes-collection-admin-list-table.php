@@ -219,14 +219,18 @@ class Quotes_Collection_Admin_List_Table extends WP_List_Table {
 		
 		// Frame the parameters to be passed to fetch the data from the database
 		$db_args = array();
-		$db_args['orderby'] = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'quote_id';
-		if( empty($_REQUEST['order']) || !in_array( $_REQUEST['order'], array( 'ASC', 'DESC', 'asc', 'desc' ), true ) ) {
+		
+		$allowed_orderby = array('quote_id', 'quote', 'author', 'source', 'time_added');
+		$db_args['orderby'] = (!empty($_REQUEST['orderby']) && in_array($_REQUEST['orderby'], $allowed_orderby, true)) ? $_REQUEST['orderby'] : 'quote_id';
+		
+		$allowed_order = array('ASC', 'DESC');
+		if( empty($_REQUEST['order']) || !in_array( strtoupper($_REQUEST['order']), $allowed_order, true ) ) {
 			if( 'quote_id' == $db_args['orderby'] )
 				$db_args['order'] = 'DESC';
 			else $db_args['order'] = 'ASC';
 		}
 		else 
-			$db_args['order'] = $_REQUEST['order'];
+			$db_args['order'] = strtoupper($_REQUEST['order']);
 
 		if( isset( $_REQUEST['s'] ) && !empty( $_REQUEST['s'] ) ) {
 			$db_args['search'] = (string) $_REQUEST['s'];

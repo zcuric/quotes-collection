@@ -127,19 +127,22 @@ class Quotes_Collection {
 		check_ajax_referer('quotescollection');
 
 		$char_limit = (isset($_POST['char_limit']) && is_numeric($_POST['char_limit']))?$_POST['char_limit']:'';
-		$tags = $_POST['tags'];
-		$orderby = $_POST['orderby'];
+		$tags = isset($_POST['tags']) ? sanitize_text_field($_POST['tags']) : '';
+		
+		$allowed_orderby = array('random', 'quote_id', 'quote', 'author', 'source', 'time_added');
+		$orderby = isset($_POST['orderby']) && in_array($_POST['orderby'], $allowed_orderby, true) ? $_POST['orderby'] : 'random';
+		
 		$order = '';
 		$exclude = '';
 		$splice = '';
 
-		if($orderby == 'random' && $_POST['current'] && is_numeric($_POST['current'])) {
+		if($orderby == 'random' && isset($_POST['current']) && is_numeric($_POST['current'])) {
 			$exclude = $_POST['current'];
 			$splice = '';
 			$order = '';
 		}
 		else {
-			if ($_POST['current'] && is_numeric($_POST['current']))
+			if (isset($_POST['current']) && is_numeric($_POST['current']))
 				$splice = $_POST['current'];
 			$exclude = '';
 			$order = 'DESC';
