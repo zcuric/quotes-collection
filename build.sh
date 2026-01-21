@@ -126,24 +126,26 @@ echo -e "${GREEN}Building $PLUGIN_NAME v$VERSION...${NC}"
 # Create build directory
 BUILD_DIR="build"
 DIST_DIR="dist"
+# Plugin folder name (without version) - WordPress requires this for updates
+PLUGIN_FOLDER="quotes-collection"
 
 echo -e "${YELLOW}Cleaning up old builds...${NC}"
 rm -rf "$BUILD_DIR" "$DIST_DIR"
 
-mkdir -p "$BUILD_DIR"
+mkdir -p "$BUILD_DIR/$PLUGIN_FOLDER"
 mkdir -p "$DIST_DIR"
 
 # Copy plugin files to build directory
 echo -e "${YELLOW}Copying files...${NC}"
 
-# Files and directories to include
+# Files and directories to include (no trailing slashes - preserves directory structure)
 INCLUDE_PATTERNS=(
-    "blocks/"
-    "css/"
-    "examples/"
-    "inc/"
-    "js/"
-    "languages/"
+    "blocks"
+    "css"
+    "examples"
+    "inc"
+    "js"
+    "languages"
     "*.php"
     "*.txt"
     "*.md"
@@ -156,29 +158,29 @@ for pattern in "${INCLUDE_PATTERNS[@]}"; do
     # Use shell expansion for patterns
     for item in $pattern; do
         if [ -e "$item" ]; then
-            cp -r "$item" "$BUILD_DIR/" 2>/dev/null || true
+            cp -r "$item" "$BUILD_DIR/$PLUGIN_FOLDER/" 2>/dev/null || true
         fi
     done
 done
 
 # Copy main plugin file if not already copied
 if [ -f "$PLUGIN_FILE" ]; then
-    cp "$PLUGIN_FILE" "$BUILD_DIR/"
+    cp "$PLUGIN_FILE" "$BUILD_DIR/$PLUGIN_FOLDER/"
 fi
 
 # Remove uninstall.php from build as it's for development
-rm -f "$BUILD_DIR/uninstall.php"
+rm -f "$BUILD_DIR/$PLUGIN_FOLDER/uninstall.php"
 
 # Remove language README (not needed in distribution)
-rm -f "$BUILD_DIR/languages/README.md"
+rm -f "$BUILD_DIR/$PLUGIN_FOLDER/languages/README.md"
 
-# Create ZIP file with lowercase name and version number
+# Create ZIP file with lowercase name and version number (version in filename for releases)
 ZIP_NAME=$(echo "${PLUGIN_NAME}-${VERSION}" | tr '[:upper:]' '[:lower:]' | tr '_' '-').zip
 ZIP_PATH="$DIST_DIR/$ZIP_NAME"
 
 echo -e "${YELLOW}Creating ZIP archive...${NC}"
 cd "$BUILD_DIR"
-zip -r "../$ZIP_PATH" .
+zip -r "../$ZIP_PATH" "$PLUGIN_FOLDER"
 cd ..
 
 # Get file size

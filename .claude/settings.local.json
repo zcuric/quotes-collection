@@ -6,7 +6,11 @@
       "Bash(/usr/bin/git add:*)",
       "Bash(/usr/bin/git commit:*)",
       "Bash(/usr/bin/git status)",
-      "Bash(/usr/bin/git diff /Users/zdravko/Code/quotes-collection/build.sh)"
+      "Bash(/usr/bin/git diff /Users/zdravko/Code/quotes-collection/build.sh)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(git -C \"/Users/zdravko/Code/quotes-collection\" log --oneline -15)",
+      "Bash(./build.sh:*)"
     ]
   }
 }
