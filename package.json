@@ -1,6 +1,6 @@
 {
   "name": "quotes-collection",
-  "version": "2.5.5",
+  "version": "2.5.6",
   "description": "WordPress plugin for collecting and displaying quotes",
   "scripts": {
     "build": "./build.sh --no-bump",
