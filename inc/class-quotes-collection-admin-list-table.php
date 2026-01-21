@@ -157,9 +157,11 @@ class Quotes_Collection_Admin_List_Table extends WP_List_Table {
 			$quote->prepare_data();
 			$quote_array = (array) $quote;
 			if($highlight) {
-				$quote_array = preg_replace( 
-					"/$highlight/i", 
-					"<span class='highlight'>\$0</span>", 
+				// Escape regex special characters to prevent regex injection
+				$highlight_escaped = preg_quote( $highlight, '/' );
+				$quote_array = preg_replace(
+					"/$highlight_escaped/i",
+					"<span class='highlight'>\$0</span>",
 					$quote_array
 				);
 				unset($quote_array['quote_id']);

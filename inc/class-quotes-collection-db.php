@@ -354,18 +354,22 @@ class Quotes_Collection_DB {
 		$condition = '';
 
 		if( isset($args['quote_id']) && is_numeric($args['quote_id']) ) {
+			if($condition) $condition .= " AND";
 			$condition .= " `quote_id` = ".$args['quote_id'];
 		}
 
 		if( isset($args['exclude']) && is_numeric($args['exclude']) ) {
+			if($condition) $condition .= " AND";
 			$condition .= " `quote_id` <> ".$args['exclude'];
 		}
 
 		if( isset($args['splice']) && is_numeric($args['splice']) ) {
+			if($condition) $condition .= " AND";
 			$condition .= " `quote_id` < ".$args['splice'];
 		}
 
 		if( isset($args['author']) ) {
+			if($condition) $condition .= " AND";
 			$condition .= " `author`='" . esc_sql( stripslashes( strip_tags ( $args['author'] ) ) ) . "'";
 		}
 		if( isset($args['source']) ) {
@@ -392,23 +396,12 @@ class Quotes_Collection_DB {
 		if( isset($args['search']) && is_string($args['search']) && !empty($args['search']) ) {
 			$search_query = esc_sql( $this->db->esc_like( strip_tags( trim( $args['search'] ) ) ) );
 
+			// Optimized: '%term%' already covers exact match, prefix, and suffix matches
 			$search_condition =
-				"quote = '{$search_query}' "
-				."OR quote LIKE '{$search_query}%' "
-				."OR quote LIKE '%{$search_query}%' "
-				."OR quote LIKE '%{$search_query}' "
-				."OR author = '{$search_query}' "
-				."OR author LIKE '{$search_query},%' "
+				"quote LIKE '%{$search_query}%' "
 				."OR author LIKE '%{$search_query}%' "
-				."OR author LIKE '%{$search_query}' "
-				."OR source = '{$search_query}' "
-				."OR source LIKE '{$search_query}%' "
 				."OR source LIKE '%{$search_query}%' "
-				."OR source LIKE '%{$search_query}' "
-				."OR tags = '{$search_query}' "
-				."OR tags LIKE '{$search_query},%' "
-				."OR tags LIKE '%,{$search_query},%' "
-				."OR tags LIKE '%,{$search_query}'";
+				."OR tags LIKE '%{$search_query}%'";
 
 			if($condition) $condition .= " AND";
 			$condition .= " ({$search_condition})";
