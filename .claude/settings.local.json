@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(/usr/bin/git log --oneline -5 --no-color)",
+      "Bash(/usr/bin/git add:*)",
+      "Bash(/usr/bin/git commit:*)",
+      "Bash(/usr/bin/git status)"
+    ]
+  }
+}
