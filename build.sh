@@ -172,8 +172,8 @@ rm -f "$BUILD_DIR/uninstall.php"
 # Remove language README (not needed in distribution)
 rm -f "$BUILD_DIR/languages/README.md"
 
-# Create ZIP file
-ZIP_NAME="${PLUGIN_NAME}.zip"
+# Create ZIP file with lowercase name and version number
+ZIP_NAME=$(echo "${PLUGIN_NAME}-${VERSION}" | tr '[:upper:]' '[:lower:]' | tr '_' '-').zip
 ZIP_PATH="$DIST_DIR/$ZIP_NAME"
 
 echo -e "${YELLOW}Creating ZIP archive...${NC}"
