@@ -1,0 +1,17 @@
+# Build directories
+build/
+dist/
+
+# Development files
+.DS_Store
+Thumbs.db
+*.log
+
+# Node modules (if added later)
+node_modules/
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

@@ -1,0 +1,23 @@
+{
+  "name": "quotes-collection",
+  "version": "2.5.4",
+  "description": "WordPress plugin for collecting and displaying quotes",
+  "scripts": {
+    "build": "./build.sh --no-bump",
+    "build:patch": "./build.sh --patch",
+    "build:minor": "./build.sh --minor",
+    "build:major": "./build.sh --major",
+    "release": "npm run build:patch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srinig/quotes-collection.git"
+  },
+  "author": "Srini G",
+  "license": "GPL-2.0",
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "quotes"
+  ]
+}
